@@ -1,53 +1,96 @@
 import React from 'react';
+import { handleResponse } from '../../helpers';
+import { API_URL } from '../../config';
+import Loading from '../common/Loading';
+import './Table.css';
 
 class List extends React.Component {
-    /*initialize state of component with constructor. also initializes this keyword.*/
-    constructor (){
-        super();
+  constructor() {
+    super();
 
-        this.state = {
-          /*loading tells us if we should show loading state or a table with the current information*/
+    this.state = {
+      loading: false,
+      currencies: [],
+      error: null,
+    };
+  }
+
+  componentDidMount() {
+    this.setState({ loading: true });
+
+    fetch(`${API_URL}/cryptocurrencies?page=1&perPage=20`)
+      .then(handleResponse)
+      .then((data) => {
+        this.setState({
+          currencies: data.currencies,
           loading: false,
-            currencies: [], //data from api will populate array to hold currencies
-            error: null, //update error state if api error is generated
-        };
+        });
+      })
+      .catch((error) => {
+        this.setState({
+          error: error.errorMessage,
+          loading: false,
+        });
+      });
+  }
+
+  renderChangePercent(percent) {
+    if (percent > 0) {
+      return <span className="percent-raised">{percent}% &uarr;</span>
+    } else if (percent < 0) {
+      return <span className="percent-fallen">{percent}% &darr;</span>
+    } else {
+      return <span>{percent}</span>
+    }
+  }
+
+  render() {
+    const { loading, error, currencies } = this.state;
+
+    // render only loading component, if loading state is set to true
+    if (loading) {
+      return <div className="loading-container"><Loading /></div>
     }
 
-    //make AJAX call to API, wrap currencies and put them inside currencies state
-    componentDidMount(){
-        this.setState({ loading: true }); //never access this.state directly, use setState
-
-        fetch('https://api.udilia.com/coins/v1/cryptocurrencies?page=1&perPage=20')
-            .then(response => {
-                return response.json().then(json => {
-                    return response.ok ? json : Promise.reject(json);
-                });
-            })
-            .then((data) => {
-                this.setState({
-                    currencies: data.currencies,
-                    loading: false
-                });
-            })
-            .catch((error) => {
-                this.setState({
-                    error: error.errorMessage,
-                    loading: false
-                });
-            });
+    // render only error message, if error occurred while fetching data
+    if (error) {
+      return <div className="error">{error}</div>
     }
 
-    render() {
-        console.log(this.state); //to view state change
-
-        if(this.state.loading){
-            return <div>Loading...</div>
-        }
-
-        return (
-            <div>text</div>
-        );
-    }
+    return (
+      <div className="Table-container">
+        <table className="Table">
+          <thead className="Table-head">
+          <tr>
+            <th>Cryptocurrency</th>
+            <th>Price</th>
+            <th>Market Cap</th>
+            <th>24H Change</th>
+          </tr>
+          </thead>
+          <tbody className="Table-body">
+          {currencies.map((currency) => (
+            <tr key={currency.id}>
+              <td>
+                <span className="Table-rank">{currency.rank}</span>
+                {currency.name}
+              </td>
+              <td>
+                <span className="Table-dollar">$ {currency.price}</span>
+              </td>
+              <td>
+                <span className="Table-dollar">$ {currency.marketCap}</span>
+              </td>
+              <td>
+                {this.renderChangePercent(currency.percentChange24h)}
+              </td>
+            </tr>
+          ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
 }
 
 export default List;
