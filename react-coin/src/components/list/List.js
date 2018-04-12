@@ -2,7 +2,8 @@ import React from 'react';
 import { handleResponse } from '../../helpers';
 import { API_URL } from '../../config';
 import Loading from '../common/Loading';
-import './Table.css';
+import Table from './Table';
+import Pagination from './Pagination';
 
 class List extends React.Component {
   constructor() {
@@ -12,17 +13,30 @@ class List extends React.Component {
       loading: false,
       currencies: [],
       error: null,
+      totalPages: 0,
+      page: 1,
     };
+
+    this.handlePaginationClick = this.handlePaginationClick.bind(this);
   }
 
   componentDidMount() {
+    this.fetchCurrencies();
+  }
+
+  fetchCurrencies() {
     this.setState({ loading: true });
 
-    fetch(`${API_URL}/cryptocurrencies?page=1&perPage=20`)
+    const { page } = this.state;
+
+    fetch(`${API_URL}/cryptocurrencies?page=${page}&perPage=20`)
       .then(handleResponse)
       .then((data) => {
+        const { currencies, totalPages } = data;
+
         this.setState({
-          currencies: data.currencies,
+          currencies,
+          totalPages,
           loading: false,
         });
       })
@@ -44,8 +58,21 @@ class List extends React.Component {
     }
   }
 
+  handlePaginationClick(direction) {
+    let nextPage = this.state.page;
+
+    // Increment nextPage if direction variable is next, otherwise decrement
+    nextPage = direction === 'next' ? nextPage + 1 : nextPage - 1;
+
+    this.setState({ page: nextPage }, () => {
+      // call fetchCurrencies function inside setState's callback
+      // because we have to make sure first page state is updated
+      this.fetchCurrencies();
+    });
+  }
+
   render() {
-    const { loading, error, currencies } = this.state;
+    const { loading, error, currencies, page, totalPages } = this.state;
 
     // render only loading component, if loading state is set to true
     if (loading) {
@@ -58,36 +85,17 @@ class List extends React.Component {
     }
 
     return (
-      <div className="Table-container">
-        <table className="Table">
-          <thead className="Table-head">
-          <tr>
-            <th>Cryptocurrency</th>
-            <th>Price</th>
-            <th>Market Cap</th>
-            <th>24H Change</th>
-          </tr>
-          </thead>
-          <tbody className="Table-body">
-          {currencies.map((currency) => (
-            <tr key={currency.id}>
-              <td>
-                <span className="Table-rank">{currency.rank}</span>
-                {currency.name}
-              </td>
-              <td>
-                <span className="Table-dollar">$ {currency.price}</span>
-              </td>
-              <td>
-                <span className="Table-dollar">$ {currency.marketCap}</span>
-              </td>
-              <td>
-                {this.renderChangePercent(currency.percentChange24h)}
-              </td>
-            </tr>
-          ))}
-          </tbody>
-        </table>
+      <div>
+        <Table
+          currencies={currencies}
+          renderChangePercent={this.renderChangePercent}
+        />
+
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          handlePaginationClick={this.handlePaginationClick}
+        />
       </div>
     );
   }
