@@ -1,11 +1,11 @@
 # Stephanie Spears Coin React #
 
-#### _Bitcoin Value in React, May 2nd, 2018_
+#### _Cryptocurrency Value in React, May 2nd, 2018_
 #### By ***Stephanie Spears***
 
 ## Description
 
-_This is a web application for monitoring the value of bitcoin_
+_A web application for monitoring the value of top cryptocurrencies_
 
 
 ## Heroku Deployment link
@@ -19,7 +19,12 @@ _Please feel free to contact stephanie.spears1@gmail.com for any additional info
 ## Technologies Used
 
 * _React_
+* _AJAX_
+* _Webpack_
+* _JSX_
 * _Node.js_
+* _npm_
+* _ES6_
 * _BootStrap_
 
 ### License
