@@ -21,7 +21,7 @@ const App = () => {
       </div>
     </BrowserRouter>
   );
-}
+};
 
 ReactDOM.render(
   <App />,
