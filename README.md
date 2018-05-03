@@ -8,7 +8,7 @@
 _This is a web application for monitoring the value of bitcoin_
 
 
-## GitHub Pages link
+## Heroku Deployment link
 
 View this site on Heroku ***[here](https://coinreact.herokuapp.com/)***
 
